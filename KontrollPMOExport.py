@@ -167,7 +167,7 @@ class KontrollPMOExport:
         
         with open(self.values[self.variable_names[4]], mode="r", encoding="UTF-8") as file:
             for row in list(file):
-                path = str(row).split(os.path.sep)
+                path = str(row).replace("/", os.path.sep).split(os.path.sep)
                 
                 # Tar bort elevens log.
                 try:
