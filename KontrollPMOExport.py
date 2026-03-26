@@ -96,7 +96,7 @@ class KontrollPMOExport:
 
         # Identifierar rätt nivå för elevens huvudmapp.
         next_folder = os.listdir(self.values[self.variable_names[0]])[0]
-        depth = int(len(str(self.values[self.variable_names[0]]).split(os.path.sep)))
+        depth = int(len(str(self.values[self.variable_names[0]]).replace("/", os.path.sep).split(os.path.sep)))
         # En individuell exportmapp har valts.
         if re.match(r"[\d]{4}-[\d]{2}", next_folder):
             depth += 2
