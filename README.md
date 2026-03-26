@@ -1,9 +1,13 @@
 # Kontrollera PMO Export
 Arkivfunktioner att genomföra i PMOs exportpaket - söka efter elever utan elevhälsovårdsakt, söka efter elever med tillfälliga personnummer, och samtidigt gallra de tomma eleverna.
+![image](<img width="1156" height="685" alt="image" src="https://github.com/user-attachments/assets/2a8f099b-dd58-4d6a-a57b-848c1062f11b" />)
 
 # Beskrivning
 Detta programstöd har framarbetats för att kunna erbjuda tidsbesparande arbete rörande PMOs arkivexporter inför att dessa läses in till organisationens e-arkiv.
-Det är vankigt att skolans organisation genomför automatiserade inläsningar av elevuppgifter in till PMO, i dessa fall är det valigt att elever som aldrig kommer vara ktuella för elevhhälsan läses in - så som elever med köpta platser eller skolgång i grannkommun. 
+
+Det är vanligt att skolans organisation genomför automatiserade inläsningar av elevuppgifter in till PMO, i dessa fall är det vanligt att elever som aldrig kommer vara aktuella för elevhhälsan läses in - så som elever med köpta platser eller skolgång i grannkommun. 
+
+Vidare försöker programmet identifiera vilka elever som har tillfälliga personnummer i exportpaketet. Detta möjliggör vidare utredning av verksamheten för att se ifall det finns ett senare korrekt personnumemr att applicera på eleven.
 
 # Förberedelser
 1. Ladda ner den senaste releasen av Kontrollera-PMO-export.
