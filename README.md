@@ -1,6 +1,6 @@
 # Kontrollera PMO Export
 Arkivfunktioner att genomföra i PMOs exportpaket - söka efter elever utan elevhälsovårdsakt, söka efter elever med tillfälliga personnummer, och samtidigt gallra de tomma eleverna.
-![image](<img width="1156" height="685" alt="image" src="https://github.com/user-attachments/assets/2a8f099b-dd58-4d6a-a57b-848c1062f11b" />)
+![image](https://github.com/user-attachments/assets/4dcbba0a-d857-4ab7-bbc9-30ee29eeed88")
 
 # Beskrivning
 Detta programstöd har framarbetats för att kunna erbjuda tidsbesparande arbete rörande PMOs arkivexporter inför att dessa läses in till organisationens e-arkiv.
