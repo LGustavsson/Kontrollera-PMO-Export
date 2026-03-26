@@ -19,5 +19,13 @@ Programmet har framarbetats av Linus Gustavsson, linus.gustavsson.1@gmail.com.
 Ikonen är hämtad från - [https://icon-icons.com/icon/archive/125380](https://icon-icons.com/icon/archive/125380)
 
 # Creative Commons License
-![image](https://github.com/user-attachments/assets/22d24ea9-5ecc-4e4f-be3a-0e51860bfb22)
-This work is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).  
+Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
