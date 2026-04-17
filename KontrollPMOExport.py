@@ -1,8 +1,9 @@
-import FreeSimpleGUI as sg
 import csv
+import FreeSimpleGUI as sg
 import os
-import re
 import shutil
+import time
+
 
 class KontrollPMOExport:
     def __init__(self):
@@ -32,13 +33,11 @@ class KontrollPMOExport:
             match event:
                 case sg.WIN_CLOSED:
                     break
-
                 case "Genomför kontroll":
                     if self.search_error_check():
                         continue
                     else:
                         self.search()
-
                 case "Genomför gallring":
                     if self.remove_error_check():
                         continue
@@ -85,53 +84,52 @@ class KontrollPMOExport:
             [sg.Output(key="output", expand_x=True, size=(None,10))],
             ]
        
-        return sg.Window(title="Kontroll PMO Export", layout=layout, icon=os.path.join(os.path.dirname(__file__), "icon.ico"))
+        return sg.Window(
+            title="Kontroll PMO Export", 
+            layout=layout, 
+            icon=os.path.join(os.path.dirname(__file__), "icon.ico"),
+            )
 
     def search(self):
         data = {}
         students_folder_paths = []
         wrong_folder_paths =  []
         count = 1
-        size = 0
+        self.values[self.variable_names[0]] = str(self.values[self.variable_names[0]]).replace("/", os.path.sep)
 
         # Identifierar rätt nivå för elevens huvudmapp.
         next_folder = os.listdir(self.values[self.variable_names[0]])[0]
-        depth = int(len(str(self.values[self.variable_names[0]]).replace("/", os.path.sep).split(os.path.sep)))
-        # En individuell exportmapp har valts.
-        if re.match(r"[\d]{4}-[\d]{2}", next_folder):
+        depth = int(len(str(self.values[self.variable_names[0]]).split(os.path.sep)))
+        if len(next_folder) == 7:   # En individuell exportmapp har valts - 1995-03.
             depth += 2
-        # En månadsmapp har valts.
-        elif re.match(r"[\d]{12}", next_folder):
+            print("En enskild export har identifierats som utgångspunkt. Sökningen startar.")
+        elif len(next_folder) == 12:    # En månadsmapp har valts - 199503045555.
             depth += 1
-        # Servermappen har valts.
+            print("En månadsmapp har identifierats som utgångspunkt. Sökningen startar.")
         else:
-            depth += 3
+            depth += 3  # Servermappen har valts.
+            print("Servermappen har identifierats som utgångspunkt. Sökningen startar.")
+        time.sleep(3)   # Väntar några sekunder så man hinner se vad programmet har identifierat. 
 
         for root, dirs, _ in os.walk(self.values[self.variable_names[0]]):
             for dir in dirs:
                 print(f"Genomsökta mappar: {count}")
                 count += 1
-
                 # Hoppar över alla mappar som inte är elevens huvudmapp
                 if len(str(os.path.join(root, dir)).split(os.path.sep)) != depth:
                     continue
-
                 # Identifierar ifall personnumet är fel. Ordningen på kontrollerna är viktiga.
                 if not str(dir).isnumeric() or int(dir[6:8]) > 31 or len(dir) != 12:
                     wrong_folder_paths.append([os.path.join(root, dir)])
                     continue
-
                 # Bearbetar elever.
                 if not dir[:4] in data:
                     data[dir[:4]] = {"stats": {"total": 1, "tomma": 0}}
                 else:
                     data[dir[:4]]["stats"]["total"] += 1 
-
                 # Identifierar tomma elever.            
                 if len([file for file in os.listdir(os.path.join(root, dir)) if os.path.isfile(os.path.join(root, dir, file))]) <= 2:
                     data[dir[:4]]["stats"]["tomma"] += 1  
-                    for file in os.listdir(os.path.join(root, dir)):
-                        size += os.stat(os.path.join(root, dir, file)).st_size
                     students_folder_paths.append([os.path.join(root, dir)])
         
         # Skapar statistikfil.
@@ -139,28 +137,35 @@ class KontrollPMOExport:
             writer = csv.writer(file, delimiter=",", lineterminator="\n")
             writer.writerow(["Årtal", "Antal Total", "Antal Tomma", "Procent"])
             for key in sorted(data):
-                writer.writerow([key, data[key]["stats"]["total"], data[key]["stats"]["tomma"], round((data[key]["stats"]["tomma"] / data[key]["stats"]["total"]) * 100)])
+                writer.writerow([
+                    key, 
+                    data[key]["stats"]["total"], 
+                    data[key]["stats"]["tomma"], 
+                    round((data[key]["stats"]["tomma"] / data[key]["stats"]["total"]) * 100)
+                    ])
             writer.writerow(["Totalt antal tomma elever", f"{len(students_folder_paths)} st"])
-            writer.writerow(["Total storlek på datan", f"{round((size / 1024) / 1024, 2)} mb"])
-        print("\n", f"Fil med statistik har genererats här: {file.name}")
-
+        print(f"Fil med statistik har genererats här: {file.name}")
         # Om det finns tomma elever.
         if students_folder_paths:
             with open(os.path.join(self.values[self.variable_names[2]], self.file_names[1]), mode="w", encoding="UTF-8") as file:
                 writer = csv.writer(file, delimiter=",", lineterminator="\n")
                 writer.writerows(students_folder_paths)
-                print("\n", f"Fil med sökvägar har genererats här: {file.name}")
-
+                print(f"Fil med sökvägar har genererats här: {file.name}")
         # Om det finns felaktiga personnummer.
         if wrong_folder_paths:
             with open(os.path.join(self.values[self.variable_names[2]], self.file_names[2]), mode="w", encoding="UTF-8") as file:
                 writer = csv.writer(file, delimiter=",", lineterminator="\n")
                 writer.writerows(wrong_folder_paths)
-                print("\n", f"Fil med felaktiga personnummer har genererats här: {file.name}")
-        
+                print(f"Fil med felaktiga personnummer har genererats här: {file.name}")
         print("Sökningen är avslutad.")
 
     def remove(self):
+        """
+        I exportmappen från PMO enligt aktuell version så genereras ett dokument med samtliga filers hashvärden.
+        Döpt till "FileList.sh1".
+        Vid inläsning till Comprima så verkar detta dokument inte riktigt påverkas,
+        så har ingen kodbas för radering av de filhänvisningara.
+        """
         success = []
         failure = []
         count = 1
@@ -168,23 +173,18 @@ class KontrollPMOExport:
         with open(self.values[self.variable_names[4]], mode="r", encoding="UTF-8") as file:
             for row in list(file):
                 path = str(row).replace("/", os.path.sep).split(os.path.sep)
-                
                 # Tar bort elevens log.
                 try:
                     os.remove(os.path.join(os.path.sep.join(i for i in path[:-2]), "Logs", f"{str(path[-1]).strip()}_log.xml"))
-                    success.append(f"{path[-1]} logfil")
+                    success.append(f"{path[-1].strip()} logfil")
                 except OSError:
                     failure.append(os.path.join("/".join(i for i in path[:-2]), "Logs", f"{str(path[-1]).strip()}_log.xml"))
-            
                 # Tar bort elevens mapp.
                 try:
                     shutil.rmtree(os.path.abspath(str(row).strip()))
-                    success.append(f"{path[-1]} mapp")
+                    success.append(f"{path[-1].strip()} mapp")
                 except OSError:
                     failure.append(str(row).strip())
-
-                # Tar bort filhänvisningarna i hash-dokumentet. Verkar inte påverka inläsningen så hoppar över detta.
-                
                 print(f"Genomfört gallringsförsök {count}")
                 count += 1
 
@@ -197,7 +197,6 @@ class KontrollPMOExport:
                 for row in success:
                     file.write(f"{row}\n")
             print(f"Lyckade gallringar finns dokumenterade här {file.name}")
-        
         # Skapar gallringslog över misslyckade gallringar.
         if failure:
             with open(os.path.join(self.values[self.variable_names[6]], self.file_names[4]), mode="w", encoding="UTF-8") as file:
@@ -210,11 +209,9 @@ class KontrollPMOExport:
         
     def search_error_check(self):
         # Kontrollerar att sökvägar har valts.
-        print(self.values)
         if self.values[self.variable_names[0]] == "" or self.values[self.variable_names[2]] == "":
             print("Mappsökväg saknas.")
             return True
-        
         # Kontrollerar att filer kan skrivas.
         try:
             os.access(self.values[self.variable_names[2]], os.W_OK)
@@ -227,18 +224,17 @@ class KontrollPMOExport:
         if self.values[self.variable_names[4]] == "" or self.values[self.variable_names[6]] == "":
             print("Sökväg saknas.")
             return True
-
         # Kontrollerar att rätt fil med sökvägar har valts. 
         if os.path.basename(self.values[self.variable_names[4]]) != self.file_names[1]:
             print("Fel fil har valts.")
             return True
-
         # Kontrollerar att filer kan skrivas.
         try:
             os.access(self.values[self.variable_names[6]], os.W_OK)
         except OSError:
             print("Mappsökvägen för resultatfilen saknar skrivrättigheter. Välj en annan mapp.")
             return True
+
 
 if __name__ == "__main__":
     kontroll_pmo_export = KontrollPMOExport()
